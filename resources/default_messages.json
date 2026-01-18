@@ -1,0 +1,40 @@
+{
+  "errors": {
+    "account_not_found": "account not found: %s",
+    "entry_name_required": "entry name required",
+    "entry_no_accounts": "entry has no accounts",
+    "entry_not_found": "entry not found: %s",
+    "multiple_accounts": "multiple accounts found for %s; use --user",
+    "vault_exists": "vault already exists: %s"
+  },
+  "info": {
+    "initialized": "initialized vault: %s\n",
+    "saved": "saved: %s\n"
+  },
+  "flags": {
+    "notes": "Notes",
+    "password": "Password (omit to prompt)",
+    "user": "Username",
+    "vault": "Path to vault file"
+  },
+  "output": {
+    "name": "name: %s\n",
+    "notes": "notes: %s\n",
+    "pass": "pass: %s\n",
+    "user": "user: %s\n"
+  },
+  "prompt": {
+    "confirm_master": "Confirm password: ",
+    "entry_password": "Entry password: ",
+    "master": "Master password: ",
+    "new_master": "New master password: "
+  },
+  "usage": {
+    "cmd_add": "  add    Add or update an entry\n",
+    "cmd_get": "  get    Get an entry\n",
+    "cmd_init": "  init   Initialize a new vault\n",
+    "cmd_list": "  list   List entry names\n",
+    "commands_label": "Commands:\n",
+    "header": "schepass <command> [args]\n\n"
+  }
+}

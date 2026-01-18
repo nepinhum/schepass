@@ -16,3 +16,12 @@ func DefaultVaultPath() (string, error) {
 	}
 	return filepath.Join(home, ".schepass", "vault.bin"), nil
 }
+
+// DefaultMessagesPath returns the default messages.json location under the user's home.
+func DefaultMessagesPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return "", errHomeMissing
+	}
+	return filepath.Join(home, ".schepass", "messages.json"), nil
+}

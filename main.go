@@ -8,11 +8,20 @@ import (
 	"strings"
 
 	"github.com/nepinhum/schepass/internal/config"
+	"github.com/nepinhum/schepass/internal/message"
 	"github.com/nepinhum/schepass/internal/secureio"
 	"github.com/nepinhum/schepass/internal/vault"
 )
 
 func main() {
+	// eh, something happened and I wanted to debug, and I will remove this!
+	msgPath, err := config.DefaultMessagesPath()
+	if err == nil {
+		if err := message.LoadOrSeed(msgPath, "resources/default_messages.json"); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to load messages: %s\n", err)
+		}
+	}
+
 	if len(os.Args) < 2 {
 		usage()
 		os.Exit(2)
@@ -34,25 +43,28 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "schepass <command> [args]\n\n")
-	fmt.Fprintf(os.Stderr, "Commands:\n")
-	fmt.Fprintf(os.Stderr, "  init   Initialize a new vault\n")
-	fmt.Fprintf(os.Stderr, "  add    Add or update an entry\n")
-	fmt.Fprintf(os.Stderr, "  get    Get an entry\n")
-	fmt.Fprintf(os.Stderr, "  list   List entry names\n")
+	fmt.Fprint(os.Stderr, message.Msg("usage.header"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.commands_label"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_init"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_add"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_get"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_list"))
 }
 
 func cmdInit(args []string) {
 	fs := flag.NewFlagSet("init", flag.ExitOnError)
-	vaultPath := fs.String("vault", "", "Path to vault file")
+	vaultPath := fs.String("vault", "", message.Msg("flags.vault"))
 	fs.Parse(args)
 
 	path := resolveVaultPath(*vaultPath)
 	if _, err := os.Stat(path); err == nil {
-		fatalf("vault already exists: %s", path)
+		fatalf("%s", message.Msg("errors.vault_exists", path))
 	}
 
-	pass, err := secureio.PromptPasswordConfirm("New master password: ", "Confirm password: ")
+	pass, err := secureio.PromptPasswordConfirm(
+		message.Msg("prompt.new_master"),
+		message.Msg("prompt.confirm_master"),
+	)
 	if err != nil {
 		fatal(err)
 	}
@@ -62,15 +74,15 @@ func cmdInit(args []string) {
 		fatal(err)
 	}
 
-	fmt.Printf("initialized vault: %s\n", path)
+	fmt.Printf(message.Msg("info.initialized"), path)
 }
 
 func cmdAdd(args []string) {
 	fs := flag.NewFlagSet("add", flag.ExitOnError)
-	vaultPath := fs.String("vault", "", "Path to vault file")
-	username := fs.String("user", "", "Username")
-	password := fs.String("pass", "", "Password")
-	notes := fs.String("notes", "", "Notes")
+	vaultPath := fs.String("vault", "", message.Msg("flags.vault"))
+	username := fs.String("user", "", message.Msg("flags.user"))
+	password := fs.String("pass", "", message.Msg("flags.password"))
+	notes := fs.String("notes", "", message.Msg("flags.notes"))
 	name, flagArgs, err := extractName(args)
 	if err != nil {
 		fatal(err)
@@ -78,7 +90,7 @@ func cmdAdd(args []string) {
 	fs.Parse(flagArgs)
 	path := resolveVaultPath(*vaultPath)
 
-	master, err := secureio.PromptPassword("Master password: ")
+	master, err := secureio.PromptPassword(message.Msg("prompt.master"))
 	if err != nil {
 		fatal(err)
 	}
@@ -90,7 +102,7 @@ func cmdAdd(args []string) {
 
 	entryPass := *password
 	if entryPass == "" {
-		entryPass, err = secureio.PromptPassword("Entry password: ")
+		entryPass, err = secureio.PromptPassword(message.Msg("prompt.entry_password"))
 		if err != nil {
 			fatal(err)
 		}
@@ -112,13 +124,13 @@ func cmdAdd(args []string) {
 		fatal(err)
 	}
 
-	fmt.Printf("saved: %s\n", name)
+	fmt.Printf(message.Msg("info.saved"), name)
 }
 
 func cmdGet(args []string) {
 	fs := flag.NewFlagSet("get", flag.ExitOnError)
-	vaultPath := fs.String("vault", "", "Path to vault file")
-	username := fs.String("user", "", "Username")
+	vaultPath := fs.String("vault", "", message.Msg("flags.vault"))
+	username := fs.String("user", "", message.Msg("flags.user"))
 	name, flagArgs, err := extractName(args)
 	if err != nil {
 		fatal(err)
@@ -126,7 +138,7 @@ func cmdGet(args []string) {
 	fs.Parse(flagArgs)
 	path := resolveVaultPath(*vaultPath)
 
-	master, err := secureio.PromptPassword("Master password: ")
+	master, err := secureio.PromptPassword(message.Msg("prompt.master"))
 	if err != nil {
 		fatal(err)
 	}
@@ -138,33 +150,33 @@ func cmdGet(args []string) {
 
 	entry, ok := v.Entries[name]
 	if !ok {
-		fatalf("entry not found: %s", name)
+		fatalf("%s", message.Msg("errors.entry_not_found", name))
 	}
 
 	accountKey, account, err := pickAccount(entry, name, *username)
 	if err != nil {
 		fatal(err)
 	}
-	fmt.Printf("name: %s\n", name)
+	fmt.Printf(message.Msg("output.name"), name)
 	if account.Username != "" {
-		fmt.Printf("user: %s\n", account.Username)
+		fmt.Printf(message.Msg("output.user"), account.Username)
 	} else if accountKey != "default" {
-		fmt.Printf("user: %s\n", accountKey)
+		fmt.Printf(message.Msg("output.user"), accountKey)
 	}
-	fmt.Printf("pass: %s\n", account.Password)
+	fmt.Printf(message.Msg("output.pass"), account.Password)
 	if account.Notes != "" {
-		fmt.Printf("notes: %s\n", account.Notes)
+		fmt.Printf(message.Msg("output.notes"), account.Notes)
 	}
 }
 
 func cmdList(args []string) {
 	fs := flag.NewFlagSet("list", flag.ExitOnError)
-	vaultPath := fs.String("vault", "", "Path to vault file")
+	vaultPath := fs.String("vault", "", message.Msg("flags.vault"))
 	fs.Parse(args)
 
 	path := resolveVaultPath(*vaultPath)
 
-	master, err := secureio.PromptPassword("Master password: ")
+	master, err := secureio.PromptPassword(message.Msg("prompt.master"))
 	if err != nil {
 		fatal(err)
 	}
@@ -188,12 +200,12 @@ func accountKey(username string) string {
 
 func pickAccount(entry vault.Entry, name, user string) (string, vault.Account, error) {
 	if len(entry.Accounts) == 0 {
-		return "", vault.Account{}, errors.New("entry has no accounts")
+		return "", vault.Account{}, errors.New(message.Msg("errors.entry_no_accounts"))
 	}
 	if user != "" {
 		account, ok := entry.Accounts[user]
 		if !ok {
-			return "", vault.Account{}, fmt.Errorf("account not found: %s", user)
+			return "", vault.Account{}, fmt.Errorf("%s", message.Msg("errors.account_not_found", user))
 		}
 		return user, account, nil
 	}
@@ -202,7 +214,7 @@ func pickAccount(entry vault.Entry, name, user string) (string, vault.Account, e
 			return key, account, nil
 		}
 	}
-	return "", vault.Account{}, fmt.Errorf("multiple accounts found for %s; use --user", name)
+	return "", vault.Account{}, fmt.Errorf("%s", message.Msg("errors.multiple_accounts", name))
 }
 
 func extractName(args []string) (string, []string, error) {
@@ -216,7 +228,7 @@ func extractName(args []string) (string, []string, error) {
 		rest = append(rest, arg)
 	}
 	if name == "" {
-		return "", rest, errors.New("entry name required")
+		return "", rest, errors.New(message.Msg("errors.entry_name_required"))
 	}
 	return name, rest, nil
 }
