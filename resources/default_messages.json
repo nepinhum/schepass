@@ -9,6 +9,7 @@
   },
   "info": {
     "initialized": "initialized vault: %s\n",
+    "master_updated": "master password updated\n",
     "saved": "saved: %s\n"
   },
   "flags": {
@@ -25,6 +26,7 @@
   },
   "prompt": {
     "confirm_master": "Confirm password: ",
+    "current_master": "Current master password: ",
     "entry_password": "Entry password: ",
     "master": "Master password: ",
     "new_master": "New master password: "
@@ -34,6 +36,7 @@
     "cmd_get": "  get    Get an entry\n",
     "cmd_init": "  init   Initialize a new vault\n",
     "cmd_list": "  list   List entry names\n",
+    "cmd_passwd": "  passwd Change master password\n",
     "commands_label": "Commands:\n",
     "header": "schepass <command> [args]\n\n"
   }

@@ -36,6 +36,8 @@ func main() {
 		cmdGet(os.Args[2:])
 	case "list":
 		cmdList(os.Args[2:])
+	case "passwd":
+		cmdPasswd(os.Args[2:])
 	default:
 		usage()
 		os.Exit(2)
@@ -49,6 +51,7 @@ func usage() {
 	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_add"))
 	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_get"))
 	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_list"))
+	fmt.Fprint(os.Stderr, message.Msg("usage.cmd_passwd"))
 }
 
 func cmdInit(args []string) {
@@ -189,6 +192,38 @@ func cmdList(args []string) {
 	for name := range v.Entries {
 		fmt.Println(name)
 	}
+}
+
+func cmdPasswd(args []string) {
+	fs := flag.NewFlagSet("passwd", flag.ExitOnError)
+	vaultPath := fs.String("vault", "", message.Msg("flags.vault"))
+	fs.Parse(args)
+
+	path := resolveVaultPath(*vaultPath)
+
+	current, err := secureio.PromptPassword(message.Msg("prompt.current_master"))
+	if err != nil {
+		fatal(err)
+	}
+
+	v, err := vault.Load(path, current)
+	if err != nil {
+		fatal(err)
+	}
+
+	next, err := secureio.PromptPasswordConfirm(
+		message.Msg("prompt.new_master"),
+		message.Msg("prompt.confirm_master"),
+	)
+	if err != nil {
+		fatal(err)
+	}
+
+	if err := vault.Save(path, next, v); err != nil {
+		fatal(err)
+	}
+
+	fmt.Print(message.Msg("info.master_updated"))
 }
 
 func accountKey(username string) string {

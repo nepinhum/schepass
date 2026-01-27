@@ -12,6 +12,7 @@
 | `add` | Add or update an entry |
 | `get` | Get an entry |
 | `list` | List entry names |
+| `passwd` | Change master password |
 
 ### Flags
 
@@ -37,6 +38,9 @@
 
 # List entries.
 ./schepass list
+
+# Change master password.
+./schepass passwd
 ```
 
 ## Build
@@ -45,6 +49,12 @@
 
 ```sh
 go build ./...
+```
+
+### UI build
+
+```sh
+go build -o schepass-ui ./ui
 ```
 
 ## Install
@@ -89,4 +99,4 @@ GOOS=windows GOARCH=amd64 go build -o schepass-windows-amd64.exe .
 ## TODO
 
 - Add clipboard copy with timeout
-- Add user-friendly GUI
+- [x] Add user-friendly GUI

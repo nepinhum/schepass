@@ -5,6 +5,9 @@ BIN_NAME="schepass"
 SRC_BIN="${SRC_BIN:-./schepass}"
 PREFIX="${PREFIX:-/usr/local}"
 DEST_DIR="${DEST_DIR:-$PREFIX/bin}"
+DEFAULT_MESSAGES="${DEFAULT_MESSAGES:-./resources/default_messages.json}"
+CONFIG_DIR="${CONFIG_DIR:-$HOME/.schepass}"
+MESSAGES_PATH="${MESSAGES_PATH:-$CONFIG_DIR/messages.json}"
 
 if [ "${1:-}" = "--user" ]; then
   DEST_DIR="${DEST_DIR:-$HOME/.local/bin}"
@@ -23,4 +26,10 @@ fi
 
 mkdir -p "$DEST_DIR"
 install -m 0755 "$SRC_BIN" "$DEST_DIR/$BIN_NAME"
+
+if [ -f "$DEFAULT_MESSAGES" ] && [ ! -f "$MESSAGES_PATH" ]; then
+  mkdir -p "$CONFIG_DIR"
+  install -m 0600 "$DEFAULT_MESSAGES" "$MESSAGES_PATH"
+fi
+
 echo "installed to $DEST_DIR/$BIN_NAME"
