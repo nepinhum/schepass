@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	// eh, something happened and I wanted to debug, and I will remove this!
 	msgPath, err := config.DefaultMessagesPath()
 	if err == nil {
 		if err := message.LoadOrSeed(msgPath, "resources/default_messages.json"); err != nil {
