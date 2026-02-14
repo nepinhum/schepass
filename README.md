@@ -51,10 +51,10 @@
 go build ./...
 ```
 
-### UI build
+### GUI Application build
 
 ```sh
-go build -o schepass-ui ./ui
+go build -o schepass-gui ./gui
 ```
 
 ## Install
