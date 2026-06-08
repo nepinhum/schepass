@@ -7,7 +7,7 @@
 ### Local build
 
 ```sh
-go build ./...
+go build -o schepass .
 ```
 
 ## Install
